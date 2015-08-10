@@ -62,6 +62,30 @@
     toScanActivityIndicator.hidden = YES;
     [scanBtn addSubview:toScanActivityIndicator];
     
+//    生成二维码：
+    NSString *stringValue = @"中国人中国人中国人中国人中国人中国人中国人中国人中国人中国人中国人中国人中国人中国人中国人中国人中国人中国人中国人中国人中国人中国人中国人中国人中国人中国人中国人中国人中国人中国人中国人中国人中国人中国人中国人中国人中国人中国人中国人中国人中国人中国人中国人中国人中国人";
+    stringValue = @"http://www.baidu.com";
+    
+    NSData *data = [stringValue dataUsingEncoding:NSISOLatin1StringEncoding allowLossyConversion:NO];
+    CIFilter *filter=[CIFilter filterWithName:@"CIQRCodeGenerator"];
+    [filter setValue:data forKey:@"inputMessage"];
+    [filter setValue:@"Q" forKey:@"inputCorrectionLevel"];
+    CIImage *qrcodeImage=[filter outputImage];
+    CGFloat scaleX = 100 / [qrcodeImage extent].size.width;
+    CGFloat scaleY = 100 / [qrcodeImage extent].size.height;
+    CIImage *resultImage= [qrcodeImage imageByApplyingTransform:CGAffineTransformMakeScale(scaleX, scaleY)];
+    
+//    url是目标地址
+//    _userShareLinkIM  是一个Imageview
+//    185  是_userShareLinkIM的宽度或高度
+    
+    UIImageView *imageView = [[UIImageView alloc]initWithFrame:CGRectMake(scanBtn.frame.origin.x - 100, scanBtn.frame.origin.y, 100, 100)];
+    [imageView setImage:[UIImage imageWithCIImage:resultImage]];
+
+    [self.view addSubview:imageView];
+    
+    
+    
 }
 -(void)startScanQR
 {
@@ -73,29 +97,29 @@
 
 -(void)gotoScan
 {
-    RKNotificationHub *hud = [[RKNotificationHub alloc]initWithView:scanBtn];
-    [hud increment];
-    [hud pop];
-    [hud setCircleColor:[UIColor colorWithRed:0.98 green:0.66 blue:0.2 alpha:1]
-             labelColor:[UIColor whiteColor]];
-
-    hud.count = 3;
-    
-//    QBPopupMenuItem *item = [QBPopupMenuItem itemWithTitle:@"Text" target:self action:@selector(action:)];
-////    QBPopupMenuItem *item2 = [QBPopupMenuItem itemWithImage:[UIImage imageNamed:@"image"] target:self action:@selector(action:)];
-//    QBPopupMenuItem *item2 = [QBPopupMenuItem itemWithTitle:@"Text2" target:self action:@selector(action:)];
+//    RKNotificationHub *hud = [[RKNotificationHub alloc]initWithView:scanBtn];
+//    [hud increment];
+//    [hud pop];
+//    [hud setCircleColor:[UIColor colorWithRed:0.98 green:0.66 blue:0.2 alpha:1]
+//             labelColor:[UIColor whiteColor]];
 //
-//    QBPopupMenu *popupMenu = [[QBPopupMenu alloc] initWithItems:@[item, item2]];
+//    hud.count = 3;
 //    
-//    //    [popupMenu showInView:self.view targetRect:... animated:YES];
-//    [popupMenu showInView:self.view targetRect:scanBtn.frame animated:YES];
+////    QBPopupMenuItem *item = [QBPopupMenuItem itemWithTitle:@"Text" target:self action:@selector(action:)];
+//////    QBPopupMenuItem *item2 = [QBPopupMenuItem itemWithImage:[UIImage imageNamed:@"image"] target:self action:@selector(action:)];
+////    QBPopupMenuItem *item2 = [QBPopupMenuItem itemWithTitle:@"Text2" target:self action:@selector(action:)];
+////
+////    QBPopupMenu *popupMenu = [[QBPopupMenu alloc] initWithItems:@[item, item2]];
+////    
+////    //    [popupMenu showInView:self.view targetRect:... animated:YES];
+////    [popupMenu showInView:self.view targetRect:scanBtn.frame animated:YES];
 
 //    
-//    JPScanViewController *scanVC = [[JPScanViewController alloc]init];
-//    scanVC.delegate = self;
-//    [self.navigationController presentViewController:scanVC animated:YES completion:^{
-//        [toScanActivityIndicator stopAnimating];
-//    }];
+    JPScanViewController *scanVC = [[JPScanViewController alloc]init];
+    scanVC.delegate = self;
+    [self.navigationController presentViewController:scanVC animated:YES completion:^{
+        [toScanActivityIndicator stopAnimating];
+    }];
 }
 -(void)action:(QBPopupMenuItem *)item{
     
@@ -172,13 +196,17 @@
 
 -(void)postRequestWithParameter:(NSString *)parameter
 {
-    [resultActivityIndicator startAnimating];
-    if (scanRequester != nil) {
-        [scanRequester.connection cancel];
+    if ([parameter hasPrefix:@"http://"] || [parameter hasPrefix:@"https://"]) {
+        [[UIApplication sharedApplication] openURL:[NSURL URLWithString:parameter]];
     }
-    scanRequester = [[JPBaseRequester alloc] init];
-    scanRequester.delegate = self;
-    [scanRequester startPostRequestWithURL:kGetVerificationInfoURL bodyString:kGetVerificationInfoBody(parameter)];
+    
+//    [resultActivityIndicator startAnimating];
+//    if (scanRequester != nil) {
+//        [scanRequester.connection cancel];
+//    }
+//    scanRequester = [[JPBaseRequester alloc] init];
+//    scanRequester.delegate = self;
+//    [scanRequester startPostRequestWithURL:kGetVerificationInfoURL bodyString:kGetVerificationInfoBody(parameter)];
 }
 
 - (void)requester:(JPBaseRequester *)requester didFinishRequestWithData:(NSMutableData *)requestData
@@ -197,6 +225,7 @@
         [fail show];
     }
     [_requestResultLabel setText:[resultDic objectForKey:@"info"]];
+    
 
 }
 - (void)requester:(JPBaseRequester *)requester didFailRequestWithError:(NSError *)error

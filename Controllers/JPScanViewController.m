@@ -134,14 +134,38 @@
         AVMetadataMachineReadableCodeObject * metadataObject = [metadataObjects objectAtIndex:0];
         stringValue = metadataObject.stringValue;
     }
+    
+#pragma mark  针对含有中文的二维码优化 解决乱码现象
+    NSData *data=[stringValue dataUsingEncoding:NSUTF8StringEncoding];
+    NSStringEncoding enc = CFStringConvertEncodingToNSStringEncoding(kCFStringEncodingGB_18030_2000);
+    NSString *retStr = [[NSString alloc] initWithData:data encoding:enc];//如果中文是utf-8编码转gbk结果为空(还没搞明白)
+    if (retStr)//如果扫描中文乱码则需要处理，否则不处理
+    {
+        NSInteger max = [stringValue length];
+        char *nbytes = malloc(max + 1);
+        for (int i = 0; i < max; i++)
+        {
+            unichar ch = [stringValue characterAtIndex: i];
+            nbytes[i] = (char) ch;
+        }
+        nbytes[max] = '\0';
+        stringValue=[NSString stringWithCString: nbytes
+                                  encoding: enc];
+    }
+    
+    
 //    [self performSelector:@selector(backAction) withObject:nil afterDelay:5];
 //    Get message , go back right now
     [self backAction];
     [_session stopRunning];
 
+    
+    
+    
+    
     [JPSoundPlayer playSoundWAVWithName:@"qrcode_found"];
     [((JPMainViewController *)self.delegate).scanResultLabel setText:stringValue];
-//    [self.delegate postRequestWithParameter:stringValue];
+    [self.delegate postRequestWithParameter:stringValue];
 }
 
 -(void)openFlashlight

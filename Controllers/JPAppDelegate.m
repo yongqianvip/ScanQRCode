@@ -28,6 +28,27 @@
     // Use this method to pause ongoing tasks, disable timers, and throttle down OpenGL ES frame rates. Games should use this method to pause the game.
 }
 
+
+
+
+
+
+
+//生成二维码：
+//NSData *data = [url dataUsingEncoding:NSISOLatin1StringEncoding allowLossyConversion:NO];
+//CIFilter *filter=[CIFilter filterWithName:@"CIQRCodeGenerator"];
+//[filter setValue:data forKey:@"inputMessage"];
+//[filter setValue:@"Q" forKey:@"inputCorrectionLevel"];
+//CIImage *qrcodeImage=[filter outputImage];
+//CGFloat scaleX = 185 / [qrcodeImage extent].size.width;
+//CGFloat scaleY = 185 / [qrcodeImage extent].size.height;
+//CIImage *resultImage= [qrcodeImage imageByApplyingTransform:CGAffineTransformMakeScale(scaleX, scaleY)];
+//[_userShareLinkIM setImage:[UIImage imageWithCIImage:resultImage]];
+
+//url是目标地址
+//_userShareLinkIM  是一个Imageview
+//185  是_userShareLinkIM的宽度或高度
+
 - (void)applicationDidEnterBackground:(UIApplication *)application
 {
     // Use this method to release shared resources, save user data, invalidate timers, and store enough application state information to restore your application to its current state in case it is terminated later. 
